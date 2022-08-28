@@ -16,35 +16,38 @@ if __name__ == "__main__":
     # 相当于是输入模型的数据
     qnn = gene_qaoa_layers(g, P)
 
-    metaqaoa = MetaQAOA(T)
+    metaqaoa = MetaQAOA(T, qnn)
     loss_fn = MetaQAOALoss()
     optimizer = nn.Adam(metaqaoa.trainable_params(), learning_rate=0.001)
 
-    def forward_with_loss(theta, h, y, QNN):
-        _, y_list = metaqaoa(theta, h, y, QNN)
-        loss = loss_fn(y_list)
-        return loss
+    #*****  mindspore 1.8.1 函数式编程写的 ************
+    # 算loss时候可以, 
+    # 旧的
+    # def forward_with_loss(theta, h, y, QNN):
+    #     _, y_list = metaqaoa(theta, h, y, QNN)
+    #     loss = loss_fn(y_list)
+    #     return loss
     
-    grad_fn = ops.value_and_grad(forward_with_loss, None, optimizer.parameters)
+    # grad_fn = ops.value_and_grad(forward_with_loss, None, optimizer.parameters)
 
-    def train_one_step(theta, h, y, QNN):
-        loss, grads = grad_fn(theta, h, y, QNN)
-        optimizer(grads)
-        return loss
+    # def train_one_step(theta, h, y, QNN):
+    #     loss, grads = grad_fn(theta, h, y, QNN)
+    #     optimizer(grads)
+    #     return loss
 
-    # forward_with_loss = ForwardWithLoss(metaqaoa, loss_fn)
-    # train_one_step = TrainOneStep(forward_with_loss, optimizer)
+    forward_with_loss = ForwardWithLoss(metaqaoa, loss_fn)
+    train_one_step = TrainOneStep(forward_with_loss, optimizer)
 
     for epoch in range(epochs):
         # batch_size, seq_len, input_size
-        theta = Parameter(np.ones([1, 2 * P, 1]).astype(np.float32))
+        # theta = Parameter(np.ones([1, 2 * P, 1]).astype(np.float32))
         # num_directions * num_layers, batch_size, hidden_size
-        h = Parameter(np.zeros([1, 1, 1]).astype(np.float32))
-        y = Parameter(np.zeros([1, 1, 1]).astype(np.float32))
+        # h = Parameter(np.zeros([1, 1, 1]).astype(np.float32))
+        # y = Parameter(np.zeros([1, 1, 1]).astype(np.float32))
         # theta_list, y_list = metaqaoa(theta, h, y, qnn)
         # loss = loss_fn(y_list)
-        # loss = forward_with_loss(theta, h, y, qnn)
-        loss = train_one_step(theta, h, y, qnn)
-        print(loss)
 
+        # loss = forward_with_loss(theta, h, y, qnn)
+        loss = train_one_step()
+        print(loss)
         
