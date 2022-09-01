@@ -11,9 +11,9 @@ class ForwardWithLoss(nn.Cell):
         self.backbone = backbone
         self.loss_fn = loss_fn
 
-    def construct(self, theta, h, y, QNN):
+    def construct(self, *inputs):
         """连接前向网络和损失函数"""
-        _, y_list = self.backbone(theta, h, y, QNN)
+        _, _, _, y_list = self.backbone(*inputs)
         return self.loss_fn(y_list)
 
     def backbone_network(self):
@@ -29,9 +29,9 @@ class TrainOneStep(nn.TrainOneStepCell):
         super(TrainOneStep, self).__init__(network, optimizer)
         self.grad = ops.GradOperation(get_by_list=True)
 
-    def construct(self, theta, h, y, QNN):
+    def construct(self, *inputs):
         """构建训练过程"""
         weights = self.weights
-        loss = self.network(theta, h, y, QNN)
-        grads = self.grad(self.network, weights)(theta, h, y, QNN)
+        loss = self.network(*inputs)
+        grads = self.grad(self.network, weights)(*inputs)
         return loss, self.optimizer(grads)
