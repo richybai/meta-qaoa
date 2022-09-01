@@ -1,11 +1,47 @@
-from re import T
 import numpy as np
 import networkx as nx
 from mindquantum import Circuit, H, ZZ, RX, BarrierGate
-from mindquantum import Hamiltonian, QubitOperator, Simulator, MQEncoderOnlyOps, MQAnsatzOnlyOps, MQLayer
+from mindquantum import Hamiltonian, QubitOperator, Simulator, MQEncoderOnlyOps
 from mindspore import nn, ops, Tensor
 import mindspore as ms
 ms.context.set_context(mode=ms.context.PYNATIVE_MODE, device_target="CPU")
+
+
+def fig7_instance1():
+    """
+    生成论文中fig7 n=6 的图
+    """
+    g = nx.Graph()
+    nx.add_path(g, [0, 1])
+    nx.add_path(g, [0, 3])
+    nx.add_path(g, [0, 4])
+    nx.add_path(g, [0, 5])
+    nx.add_path(g, [1, 3])
+    nx.add_path(g, [1, 4])
+    nx.add_path(g, [1, 5])
+
+    return g
+
+
+def fig7_instance2():
+
+    g = nx.Graph()
+    nx.add_path(g, [0, 2])
+    nx.add_path(g, [0, 4])
+    nx.add_path(g, [1, 2])
+    nx.add_path(g, [1, 3])
+    nx.add_path(g, [1, 4])
+    nx.add_path(g, [1, 5])
+    nx.add_path(g, [1, 6])
+    nx.add_path(g, [1, 7])
+    nx.add_path(g, [2, 5])
+    nx.add_path(g, [2, 6])
+    nx.add_path(g, [2, 7])
+    nx.add_path(g, [3, 4])
+    nx.add_path(g, [3, 6])
+    nx.add_path(g, [4, 5])
+    nx.add_path(g, [5, 7])
+    return g
 
 
 def gene_random_instance(num_nodes):

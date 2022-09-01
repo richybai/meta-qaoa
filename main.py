@@ -1,5 +1,5 @@
 from src.config import n_train, P, T, epochs, lstm_layers
-from src.metaqaoa import gene_random_instance, gene_qaoa_layers, MetaQAOA, MetaQAOALoss
+from src.metaqaoa import gene_random_instance, gene_qaoa_layers, MetaQAOA, MetaQAOALoss, fig7_instance1, fig7_instance2
 from src.utils import ForwardWithLoss, TrainOneStep
 import numpy as np
 from mindspore import Tensor, ops, nn, Parameter
@@ -11,10 +11,11 @@ ms.context.set_context(mode=ms.context.PYNATIVE_MODE, device_target="CPU")
 # ms.set_seed(10000)
 
 if __name__ == "__main__":
-    # 生成训练数据，n_train in [6, 12], 说是生成500个训练数据， 其中250个测试
-    # 生成测试数据，n_test in [8, 14], 100个测试数据, n_train < n_test
-    g = gene_random_instance(n_train)
-    
+
+    # g = gene_random_instance(n_train)
+    # g = fig7_instance1()
+    g = fig7_instance2()
+
     # 相当于是输入模型的数据
     qnn = gene_qaoa_layers(g, P)
 
@@ -39,17 +40,19 @@ if __name__ == "__main__":
 
         loss = forward_with_loss(theta, h, c)
         theta, h, c, _ = metaqaoa(theta, h, c)
-        max_cut_loss = qnn(theta.reshape(1, -1))
-        print("epoch: ", epoch,"metaqaoa loss: ", loss, "max cut loss: ", max_cut_loss.squeeze())
+        qnn_loss = qnn(theta.reshape(1, -1))
+        print("epoch: ", epoch,"metaqaoa loss: ", loss, "max cut loss: ", qnn_loss.squeeze())
+        meta_loss.append(loss.asnumpy().squeeze())
+        max_cut_loss.append(qnn_loss.asnumpy().squeeze())
         
-    plt.plot(meta_loss)
+    plt.plot(range(epochs), meta_loss)
     plt.xlabel('epoch')
     plt.ylabel('meta loss')
     plt.title('meta loss')
     plt.savefig('meta loss.png')
 
     plt.clf()  
-    plt.plot(max_cut_loss)
+    plt.plot(range(epochs), max_cut_loss)
     plt.xlabel('epoch')
     plt.ylabel('maxcut loss')
     plt.title('maxcut loss')
